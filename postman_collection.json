@@ -1,0 +1,333 @@
+{
+	"info": {
+		"name": "Healthcare System API",
+		"description": "Complete API collection for the Healthcare Management System",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Auth Service",
+			"item": [
+				{
+					"name": "Register Doctor",
+					"request": {
+						"method": "POST",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"url": "http://localhost:3001/api/auth/register",
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"dr.smith@hospital.com\",\n  \"password\": \"password123\",\n  \"name\": \"Dr. John Smith\",\n  \"role\": \"doctor\"\n}"
+						}
+					}
+				},
+				{
+					"name": "Register Patient",
+					"request": {
+						"method": "POST",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"url": "http://localhost:3001/api/auth/register",
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"patient@email.com\",\n  \"password\": \"password123\",\n  \"name\": \"Jane Doe\",\n  \"role\": \"patient\"\n}"
+						}
+					}
+				},
+				{
+					"name": "Login",
+					"request": {
+						"method": "POST",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"url": "http://localhost:3001/api/auth/login",
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"dr.smith@hospital.com\",\n  \"password\": \"password123\"\n}"
+						}
+					}
+				},
+				{
+					"name": "Verify Token",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "Authorization", "value": "Bearer YOUR_TOKEN_HERE" }
+						],
+						"url": "http://localhost:3001/api/auth/verify"
+					}
+				}
+			]
+		},
+		{
+			"name": "Patient Service",
+			"item": [
+				{
+					"name": "Create Patient",
+					"request": {
+						"method": "POST",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"url": "http://localhost:5001/api/patients",
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Jane Doe\",\n  \"email\": \"jane.doe@email.com\",\n  \"phone\": \"+1234567890\",\n  \"date_of_birth\": \"1990-05-15\",\n  \"gender\": \"Female\",\n  \"address\": \"123 Main St, City, State 12345\",\n  \"blood_type\": \"O+\",\n  \"allergies\": [\"Penicillin\"],\n  \"medical_history\": [\"Diabetes\"]\n}"
+						}
+					}
+				},
+				{
+					"name": "Get All Patients",
+					"request": {
+						"method": "GET",
+						"url": "http://localhost:5001/api/patients"
+					}
+				},
+				{
+					"name": "Get Patient by ID",
+					"request": {
+						"method": "GET",
+						"url": "http://localhost:5001/api/patients/1"
+					}
+				},
+				{
+					"name": "Update Patient",
+					"request": {
+						"method": "PUT",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"url": "http://localhost:5001/api/patients/1",
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"phone\": \"+1987654320\"\n}"
+						}
+					}
+				},
+				{
+					"name": "Delete Patient",
+					"request": {
+						"method": "DELETE",
+						"url": "http://localhost:5001/api/patients/1"
+					}
+				}
+			]
+		},
+		{
+			"name": "Doctor Service",
+			"item": [
+				{
+					"name": "Create Doctor",
+					"request": {
+						"method": "POST",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"url": "http://localhost:3002/api/doctors",
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Dr. John Smith\",\n  \"email\": \"dr.smith@hospital.com\",\n  \"phone\": \"+1234567892\",\n  \"specialization\": \"Cardiology\",\n  \"license_number\": \"MD12345\",\n  \"years_of_experience\": 15,\n  \"qualification\": \"MD, MBBS\",\n  \"consultation_fee\": 150,\n  \"rating\": 4.8\n}"
+						}
+					}
+				},
+				{
+					"name": "Get All Doctors",
+					"request": {
+						"method": "GET",
+						"url": "http://localhost:3002/api/doctors"
+					}
+				},
+				{
+					"name": "Get Doctor by ID",
+					"request": {
+						"method": "GET",
+						"url": "http://localhost:3002/api/doctors/1"
+					}
+				},
+				{
+					"name": "Update Doctor",
+					"request": {
+						"method": "PUT",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"url": "http://localhost:3002/api/doctors/1",
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"consultation_fee\": 175\n}"
+						}
+					}
+				},
+				{
+					"name": "Set Doctor Availability",
+					"request": {
+						"method": "POST",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"url": "http://localhost:3002/api/doctors/1/availability",
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"availability\": [\n    {\n      \"day\": \"Monday\",\n      \"start_time\": \"09:00\",\n      \"end_time\": \"17:00\",\n      \"is_available\": true\n    },\n    {\n      \"day\": \"Tuesday\",\n      \"start_time\": \"09:00\",\n      \"end_time\": \"17:00\",\n      \"is_available\": true\n    }\n  ]\n}"
+						}
+					}
+				},
+				{
+					"name": "Get Doctor Availability",
+					"request": {
+						"method": "GET",
+						"url": "http://localhost:3002/api/doctors/1/availability"
+					}
+				},
+				{
+					"name": "Delete Doctor",
+					"request": {
+						"method": "DELETE",
+						"url": "http://localhost:3002/api/doctors/1"
+					}
+				}
+			]
+		},
+		{
+			"name": "Appointment Service",
+			"item": [
+				{
+					"name": "Create Appointment",
+					"request": {
+						"method": "POST",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"url": "http://localhost:3003/api/appointments",
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"patient_id\": 1,\n  \"doctor_id\": 1,\n  \"appointment_date\": \"2025-11-15\",\n  \"appointment_time\": \"10:00\",\n  \"reason\": \"Regular checkup\"\n}"
+						}
+					}
+				},
+				{
+					"name": "Get All Appointments",
+					"request": {
+						"method": "GET",
+						"url": "http://localhost:3003/api/appointments"
+					}
+				},
+				{
+					"name": "Get Appointment by ID",
+					"request": {
+						"method": "GET",
+						"url": "http://localhost:3003/api/appointments/1"
+					}
+				},
+				{
+					"name": "Get Appointments by Patient",
+					"request": {
+						"method": "GET",
+						"url": "http://localhost:3003/api/appointments/patient/1"
+					}
+				},
+				{
+					"name": "Get Appointments by Doctor",
+					"request": {
+						"method": "GET",
+						"url": "http://localhost:3003/api/appointments/doctor/1"
+					}
+				},
+				{
+					"name": "Update Appointment",
+					"request": {
+						"method": "PUT",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"url": "http://localhost:3003/api/appointments/1",
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"appointment_date\": \"2025-11-16\",\n  \"status\": \"rescheduled\"\n}"
+						}
+					}
+				},
+				{
+					"name": "Cancel Appointment",
+					"request": {
+						"method": "DELETE",
+						"url": "http://localhost:3003/api/appointments/1"
+					}
+				}
+			]
+		},
+		{
+			"name": "Billing Service",
+			"item": [
+				{
+					"name": "Calculate Bill",
+					"request": {
+						"method": "POST",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"url": "http://localhost:5002/api/billing/calculate",
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"appointment_id\": 1,\n  \"patient_id\": 1,\n  \"doctor_id\": 1,\n  \"service_type\": \"consultation\",\n  \"additional_charges\": 25.00,\n  \"description\": \"Regular consultation\"\n}"
+						}
+					}
+				},
+				{
+					"name": "Get All Bills",
+					"request": {
+						"method": "GET",
+						"url": "http://localhost:5002/api/billing"
+					}
+				},
+				{
+					"name": "Get Bill by ID",
+					"request": {
+						"method": "GET",
+						"url": "http://localhost:5002/api/billing/1"
+					}
+				},
+				{
+					"name": "Get Bill by Appointment",
+					"request": {
+						"method": "GET",
+						"url": "http://localhost:5002/api/billing/appointment/1"
+					}
+				},
+				{
+					"name": "Mark Bill as Paid",
+					"request": {
+						"method": "POST",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"url": "http://localhost:5002/api/billing/1/pay",
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"payment_method\": \"credit_card\",\n  \"transaction_id\": \"TXN123456789\"\n}"
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Health Checks",
+			"item": [
+				{
+					"name": "Auth Service Health",
+					"request": {
+						"method": "GET",
+						"url": "http://localhost:3001/health"
+					}
+				},
+				{
+					"name": "Patient Service Health",
+					"request": {
+						"method": "GET",
+						"url": "http://localhost:5001/health"
+					}
+				},
+				{
+					"name": "Doctor Service Health",
+					"request": {
+						"method": "GET",
+						"url": "http://localhost:3002/health"
+					}
+				},
+				{
+					"name": "Appointment Service Health",
+					"request": {
+						"method": "GET",
+						"url": "http://localhost:3003/health"
+					}
+				},
+				{
+					"name": "Billing Service Health",
+					"request": {
+						"method": "GET",
+						"url": "http://localhost:5002/health"
+					}
+				}
+			]
+		}
+	]
+}

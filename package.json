@@ -1,0 +1,25 @@
+{
+	"name": "healthcare-system",
+	"version": "1.0.0",
+	"description": "Microservices-based healthcare management system",
+	"scripts": {
+		"install:all": "npm install && cd services/auth-service && npm install && cd ../appointment-service && npm install && cd ../doctor-service && npm install && cd ../patient-service && pip install -r requirements.txt && cd ../billing-service && pip install -r requirements.txt",
+		"dev:auth": "cd services/auth-service && npm run dev",
+		"dev:patient": "cd services/patient-service && python app.py",
+		"dev:doctor": "cd services/doctor-service && npm run dev",
+		"dev:appointment": "cd services/appointment-service && npm run dev",
+		"dev:billing": "cd services/billing-service && python app.py",
+		"docker:build": "docker-compose build",
+		"docker:up": "docker-compose up",
+		"docker:down": "docker-compose down"
+	},
+	"keywords": [
+		"microservices",
+		"healthcare",
+		"nodejs",
+		"python",
+		"typescript"
+	],
+	"author": "",
+	"license": "ISC"
+}
