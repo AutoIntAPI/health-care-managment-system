@@ -60,10 +60,26 @@ class BillingController:
             service_type = data['service_type']
             if service_type not in self.service_rates:
                 return jsonify({'error': f'Invalid service type. Valid types: {list(self.service_rates.keys())}'}), 400
+    # Calculate bill
+    # Fetch dynamic consultation fee if service_type is consultation
+    if service_type == 'consultation':
+        try:
+            fee_response = requests.get(
+                f"{DOCTOR_SERVICE_URL}/api/doctors/{data['doctor_id']}/consultation-fee",
+                timeout=5
+            )
+            if fee_response.status_code == 200:
+                fee_data = fee_response.json()
+                base_amount = float(fee_data.get('consultation_fee', self.service_rates['consultation']))
+            else:
+                base_amount = self.service_rates['consultation']
+        except Exception as err:
+            print(f"Failed to fetch consultation fee: {str(err)}")
+            base_amount = self.service_rates['consultation']
+    else:
+        base_amount = self.service_rates[service_type]
 
-            # Calculate bill
-            base_amount = self.service_rates[service_type]
-            
+    # Add additional charges if provided
             # Add additional charges if provided
             additional_charges = data.get('additional_charges', 0)
             subtotal = base_amount + additional_charges
