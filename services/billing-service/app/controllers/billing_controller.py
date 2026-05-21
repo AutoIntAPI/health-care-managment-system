@@ -62,10 +62,26 @@ class BillingController:
                 return jsonify({'error': f'Invalid service type. Valid types: {list(self.service_rates.keys())}'}), 400
 
             # Calculate bill
-            base_amount = self.service_rates[service_type]
+            # Determine base amount, using doctor consultation fee if service is consultation
             if service_type == 'consultation':
                 try:
-                    consultation_fee_response = requests.get(
+                    fee_resp = requests.get(
+                        f"{DOCTOR_SERVICE_URL}/api/doctors/{data['doctor_id']}/consultation-fee",
+                        timeout=5
+                    )
+                    if fee_resp.status_code == 200:
+                        fee_data = fee_resp.json()
+                        doctor_fee = float(fee_data.get('consultation_fee', self.service_rates['consultation']))
+                    else:
+                        doctor_fee = self.service_rates['consultation']
+                except Exception:
+                    doctor_fee = self.service_rates['consultation']
+                base_amount = doctor_fee
+            else:
+                base_amount = self.service_rates[service_type]
+
+            # Add additional charges if provided
+            additional_charges = data.get('additional_charges', 0)
                         f"{DOCTOR_SERVICE_URL}/api/doctors/{data['doctor_id']}/consultation-fee",
                         timeout=5
                     )
