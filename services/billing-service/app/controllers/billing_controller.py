@@ -61,8 +61,24 @@ class BillingController:
             if service_type not in self.service_rates:
                 return jsonify({'error': f'Invalid service type. Valid types: {list(self.service_rates.keys())}'}), 400
 
-            # Calculate bill
-            base_amount = self.service_rates[service_type]
+            # Determine base amount, fetching dynamic consultation fee when needed
+            if service_type == 'consultation':
+                try:
+                    fee_resp = requests.get(
+                        f"{DOCTOR_SERVICE_URL}/api/doctors/{data['doctor_id']}/consultation-fee",
+                        timeout=5
+                    )
+                    fee_resp.raise_for_status()
+                    fee_data = fee_resp.json()
+                    base_amount = fee_data.get('consultation_fee', self.service_rates['consultation'])
+                except requests.exceptions.HTTPError as e:
+                    print(f"Failed to retrieve consultation fee: {e}")
+                    return jsonify({'error': 'Unable to retrieve consultation fee'}), 502
+                except requests.exceptions.RequestException as e:
+                    print(f"Doctor service error while fetching fee: {e}")
+                    return jsonify({'error': 'Doctor service unavailable'}), 503
+            else:
+                base_amount = self.service_rates[service_type]
             if service_type == 'consultation':
                 try:
                     consultation_fee_response = requests.get(
@@ -106,16 +122,6 @@ class BillingController:
         except Exception as e:
             return jsonify({'error': str(e)}), 500
 
-    def get_by_id(self, bill_id):
-        try:
-            bill = self.model.find_by_id(bill_id)
-            if not bill:
-                return jsonify({'error': 'Bill not found'}), 404
-            
-            return jsonify({'bill': bill}), 200
-
-        except Exception as e:
-            return jsonify({'error': str(e)}), 500
 
     def get_by_appointment(self, appointment_id):
         try:
