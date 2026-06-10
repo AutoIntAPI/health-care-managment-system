@@ -41,7 +41,7 @@ class BillingController:
                 )
                 if patient_response.status_code != 200:
                     return jsonify({'error': 'Patient not found'}), 404
-            except Exception as e:
+                except requests.RequestException as e:
                 print(f"Failed to verify patient: {str(e)}")
                 return jsonify({'error': 'Patient service unavailable'}), 503
 
@@ -53,7 +53,7 @@ class BillingController:
                 )
                 if doctor_response.status_code != 200:
                     return jsonify({'error': 'Doctor not found'}), 404
-            except Exception as e:
+            except requests.RequestException as e:
                 print(f"Failed to verify doctor: {str(e)}")
                 return jsonify({'error': 'Doctor service unavailable'}), 503
 
@@ -62,8 +62,21 @@ class BillingController:
                 return jsonify({'error': f'Invalid service type. Valid types: {list(self.service_rates.keys())}'}), 400
 
             # Calculate bill
-            base_amount = self.service_rates[service_type]
             if service_type == 'consultation':
+                try:
+                    fee_resp = requests.get(
+                        f"{DOCTOR_SERVICE_URL}/api/doctors/{data['doctor_id']}/consultation-fee",
+                        timeout=5
+                    )
+                    fee_resp.raise_for_status()
+                    fee_data = fee_resp.json()
+                    base_amount = fee_data.get('consultation_fee', self.service_rates['consultation'])
+                except requests.RequestException as e:
+                    print(f"Failed to fetch consultation fee: {str(e)}")
+                    base_amount = self.service_rates['consultation']
+            else:
+                base_amount = self.service_rates[service_type]
+
                 try:
                     consultation_fee_response = requests.get(
                         f"{DOCTOR_SERVICE_URL}/api/doctors/{data['doctor_id']}/consultation-fee",
@@ -107,16 +120,6 @@ class BillingController:
             return jsonify({'error': str(e)}), 500
 
     def get_by_id(self, bill_id):
-        try:
-            bill = self.model.find_by_id(bill_id)
-            if not bill:
-                return jsonify({'error': 'Bill not found'}), 404
-            
-            return jsonify({'bill': bill}), 200
-
-        except Exception as e:
-            return jsonify({'error': str(e)}), 500
-
     def get_by_appointment(self, appointment_id):
         try:
             bill = self.model.find_by_appointment(appointment_id)
