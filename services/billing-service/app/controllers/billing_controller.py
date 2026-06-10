@@ -1,5 +1,6 @@
 from flask import jsonify
 import requests
+import httpx
 import os
 from app.models.billing_model import BillingModel
 
@@ -13,13 +14,10 @@ class BillingController:
         self.model = BillingModel()
         # Service pricing
         self.service_rates = {
-            'consultation': 100.00,
             'follow_up': 75.00,
             'emergency': 200.00,
             'surgery': 1500.00,
-            'lab_test': 50.00,
-            'x_ray': 150.00,
-            'mri': 800.00
+            'lab_test': 50.00
         }
         self.tax_rate = 0.08  # 8% tax
 
@@ -65,6 +63,25 @@ class BillingController:
             base_amount = self.service_rates[service_type]
             if service_type == 'consultation':
                 try:
+
+            # Fetch consultation fee from doctor service if service type is consultation
+            if service_type == 'consultation':
+                try:
+                    doctor_fee_response = httpx.get(
+                        f"{DOCTOR_SERVICE_URL}/api/doctors/{data['doctor_id']}/consultation-fee",
+                        timeout=5
+                    )
+                    doctor_fee_response.raise_for_status()
+                    doctor_fee_data = doctor_fee_response.json()
+                    base_amount = float(doctor_fee_data['consultation_fee'])
+                except httpx.HTTPStatusError as e:
+                    print(f"Failed to fetch consultation fee: {e}")
+                    return jsonify({'error': 'Failed to fetch doctor consultation fee'}), 503
+                except Exception as e:
+                    print(f"Unexpected error fetching consultation fee: {e}")
+                    return jsonify({'error': 'Internal error fetching consultation fee'}), 500
+            elif service_type in self.service_rates:
+                base_amount = self.service_rates[service_type]
                     consultation_fee_response = requests.get(
                         f"{DOCTOR_SERVICE_URL}/api/doctors/{data['doctor_id']}/consultation-fee",
                         timeout=5
@@ -73,7 +90,7 @@ class BillingController:
                         base_amount = consultation_fee_response.json().get('consultation_fee', base_amount)
                 except Exception as e:
                     print(f"Failed to fetch consultation fee: {str(e)}")
-            
+            subtotal = float(base_amount) + float(additional_charges)
             # Add additional charges if provided
             additional_charges = data.get('additional_charges', 0)
             subtotal = base_amount + additional_charges
