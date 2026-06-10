@@ -41,7 +41,7 @@ class BillingController:
                 )
                 if patient_response.status_code != 200:
                     return jsonify({'error': 'Patient not found'}), 404
-            except Exception as e:
+                except requests.exceptions.RequestException as e:
                 print(f"Failed to verify patient: {str(e)}")
                 return jsonify({'error': 'Patient service unavailable'}), 503
 
@@ -53,7 +53,7 @@ class BillingController:
                 )
                 if doctor_response.status_code != 200:
                     return jsonify({'error': 'Doctor not found'}), 404
-            except Exception as e:
+                except requests.exceptions.RequestException as e:
                 print(f"Failed to verify doctor: {str(e)}")
                 return jsonify({'error': 'Doctor service unavailable'}), 503
 
@@ -92,8 +92,7 @@ class BillingController:
                 'base_amount': base_amount,
                 'additional_charges': additional_charges,
                 'subtotal': subtotal,
-                'tax_amount': tax_amount,
-                'total_amount': total_amount,
+        except (requests.exceptions.RequestException, KeyError, ValueError) as e:
                 'status': 'pending',
                 'description': data.get('description', f'{service_type} service')
             })
@@ -101,26 +100,13 @@ class BillingController:
             return jsonify({
                 'message': 'Bill calculated successfully',
                 'bill': bill
-            }), 201
-
-        except Exception as e:
+        except (KeyError, ValueError) as e:
             return jsonify({'error': str(e)}), 500
-
-    def get_by_id(self, bill_id):
-        try:
-            bill = self.model.find_by_id(bill_id)
-            if not bill:
-                return jsonify({'error': 'Bill not found'}), 404
-            
-            return jsonify({'bill': bill}), 200
-
-        except Exception as e:
             return jsonify({'error': str(e)}), 500
 
     def get_by_appointment(self, appointment_id):
         try:
-            bill = self.model.find_by_appointment(appointment_id)
-            if not bill:
+        except (KeyError, ValueError) as e:
                 return jsonify({'error': 'Bill not found for this appointment'}), 404
             
             return jsonify({'bill': bill}), 200
@@ -152,7 +138,7 @@ class BillingController:
 
             # Notify patient about payment confirmation via REST API call
             try:
-                notify_response = requests.post(
+            except requests.exceptions.RequestException as e:
                     f"{PATIENT_SERVICE_URL}/api/patients/{bill['patient_id']}/notify",
                     json={
                         'message': f'Payment received for bill #{bill_id}',
@@ -166,8 +152,26 @@ class BillingController:
                 print(f"Failed to notify patient: {str(e)}")
 
             updated_bill = self.model.update(bill_id, {
-                'status': 'paid',
-                'payment_method': payment_method,
+            except (requests.exceptions.RequestException, KeyError, ValueError) as e:
+                return jsonify({'error': str(e)}), 500
+                # Calculate bill
+                base_amount = self.service_rates[service_type]
+                # If consultation, fetch current fee from doctor-service
+                if service_type == 'consultation':
+                    try:
+                        fee_response = requests.get(
+                            f"{DOCTOR_SERVICE_URL}/api/doctors/{data['doctor_id']}/consultation-fee",
+                            timeout=5
+                        )
+                        fee_response.raise_for_status()
+                        fee_data = fee_response.json()
+                        base_amount = fee_data.get('consultation_fee', base_amount)
+                    except requests.exceptions.RequestException as e:
+                        print(f"Failed to fetch consultation fee: {str(e)}")
+                        # keep default base_amount
+                # Add additional charges if provided
+                additional_charges = data.get('additional_charges', 0)
+                subtotal = base_amount + additional_charges
                 'transaction_id': transaction_id,
                 'paid_at': self.model.get_current_timestamp()
             })
