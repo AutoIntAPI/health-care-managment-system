@@ -1,4 +1,5 @@
 from flask import jsonify
+import httpx
 import requests
 import os
 from app.models.billing_model import BillingModel
@@ -13,13 +14,6 @@ class BillingController:
         self.model = BillingModel()
         # Service pricing
         self.service_rates = {
-            'consultation': 100.00,
-            'follow_up': 75.00,
-            'emergency': 200.00,
-            'surgery': 1500.00,
-            'lab_test': 50.00,
-            'x_ray': 150.00,
-            'mri': 800.00
         }
         self.tax_rate = 0.08  # 8% tax
 
@@ -45,19 +39,36 @@ class BillingController:
                 print(f"Failed to verify patient: {str(e)}")
                 return jsonify({'error': 'Patient service unavailable'}), 503
 
+            # Fetch doctor's consultation fee for consultation services
             # Verify doctor exists via REST API call
-            try:
-                doctor_response = requests.get(
-                    f"{DOCTOR_SERVICE_URL}/api/doctors/{data['doctor_id']}",
-                    timeout=5
+                if service_type == 'consultation':
+                    fee_response = requests.get(
+                        f"{DOCTOR_SERVICE_URL}/api/doctors/{data['doctor_id']}/consultation-fee",
+                        timeout=5
+                    )
+                    if fee_response.status_code == 200:
+                        fee_data = fee_response.json()
+                        base_amount = fee_data.get('consultation_fee', 100.00)
+                    else:
+                        base_amount = 100.00  # Default consultation fee
+                else:
+                    # For other service types, use fixed rates
+                    service_rates = {
+                        'follow_up': 75.00,
+                        'emergency': 200.00,
+                        'surgery': 1500.00,
+                        'lab_test': 50.00,
+                        'x_ray': 150.00,
+                        'mri': 800.00
+                    }
+                    if service_type not in service_rates:
+                        return jsonify({'error': f'Invalid service type. Valid types: {list(service_rates.keys())}'}), 400
+                    base_amount = service_rates[service_type]
+            except httpx.HTTPStatusError as e:
+                print(f"Failed to fetch doctor fee: {str(e)}")
+                return jsonify({'error': 'Doctor service unavailable'}), 503
                 )
                 if doctor_response.status_code != 200:
-                    return jsonify({'error': 'Doctor not found'}), 404
-            except Exception as e:
-                print(f"Failed to verify doctor: {str(e)}")
-                return jsonify({'error': 'Doctor service unavailable'}), 503
-
-            service_type = data['service_type']
             if service_type not in self.service_rates:
                 return jsonify({'error': f'Invalid service type. Valid types: {list(self.service_rates.keys())}'}), 400
 

@@ -14,10 +14,6 @@ def get_bill(bill_id):
 
 @billing_bp.route('', methods=['GET'])
 def get_all_bills():
-    return controller.get_all()
-
-@billing_bp.route('/<int:bill_id>/pay', methods=['POST'])
-def pay_bill(bill_id):
     return controller.mark_as_paid(bill_id, request)
 
 @billing_bp.route('/patient/<int:patient_id>', methods=['GET'])
