@@ -63,6 +63,16 @@ class BillingController:
 
             # Calculate bill
             base_amount = self.service_rates[service_type]
+            if service_type == 'consultation':
+                try:
+                    consultation_fee_response = requests.get(
+                        f"{DOCTOR_SERVICE_URL}/api/doctors/{data['doctor_id']}/consultation-fee",
+                        timeout=5
+                    )
+                    if consultation_fee_response.status_code == 200:
+                        base_amount = consultation_fee_response.json().get('consultation_fee', base_amount)
+                except Exception as e:
+                    print(f"Failed to fetch consultation fee: {str(e)}")
             
             # Add additional charges if provided
             additional_charges = data.get('additional_charges', 0)

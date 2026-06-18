@@ -166,20 +166,47 @@ export class DoctorController {
 		}
 	}
 
-	async setAvailability(req: Request, res: Response): Promise<void> {
+	async getConsultationFee(req: Request, res: Response): Promise<void> {
 		try {
 			const id = parseInt(req.params.id);
-			const availability: DoctorAvailability[] = req.body.availability;
+			const doctor = this.model.findById(id);
 
-			if (!this.model.findById(id)) {
+			if (!doctor) {
 				res.status(404).json({ error: "Doctor not found" });
 				return;
 			}
 
-			const doctor = this.model.setAvailability(id, availability);
+			res.status(200).json({
+				doctor_id: doctor.id,
+				consultation_fee: doctor.consultation_fee,
+			});
+		} catch (error) {
+			console.error("Get consultation fee error:", error);
+			res.status(500).json({ error: "Failed to get consultation fee" });
+		}
+	}
+
+	async setAvailability(req: Request, res: Response): Promise<void> {
+		try {
+			const id = parseInt(req.params.id);
+			const doctor = this.model.findById(id);
+			if (!doctor) {
+				res.status(404).json({ error: "Doctor not found" });
+				return;
+			}
+
+			const availability: DoctorAvailability[] =
+				req.body.availability ?? doctor.availability;
+			const consultationFee = req.body.consultation_fee;
+
+			if (consultationFee !== undefined) {
+				this.model.update(id, { consultation_fee: consultationFee });
+			}
+
+			const updatedDoctor = this.model.setAvailability(id, availability);
 			res.status(200).json({
 				message: "Availability updated successfully",
-				doctor,
+				doctor: updatedDoctor,
 			});
 		} catch (error) {
 			console.error("Set availability error:", error);

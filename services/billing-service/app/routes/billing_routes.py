@@ -12,10 +12,6 @@ def calculate_bill():
 def get_bill(bill_id):
     return controller.get_by_id(bill_id)
 
-@billing_bp.route('/appointment/<int:appointment_id>', methods=['GET'])
-def get_bill_by_appointment(appointment_id):
-    return controller.get_by_appointment(appointment_id)
-
 @billing_bp.route('', methods=['GET'])
 def get_all_bills():
     return controller.get_all()
