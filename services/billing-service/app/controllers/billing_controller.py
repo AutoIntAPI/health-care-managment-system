@@ -23,10 +23,9 @@ class BillingController:
         }
         self.tax_rate = 0.08  # 8% tax
 
-    def calculate(self, request):
-        try:
+        def calculate(self, request):
             data = request.get_json()
-            
+
             # Validate required fields
             required_fields = ['appointment_id', 'patient_id', 'doctor_id', 'service_type']
             for field in required_fields:
@@ -41,7 +40,7 @@ class BillingController:
                 )
                 if patient_response.status_code != 200:
                     return jsonify({'error': 'Patient not found'}), 404
-            except Exception as e:
+            except requests.exceptions.RequestException as e:
                 print(f"Failed to verify patient: {str(e)}")
                 return jsonify({'error': 'Patient service unavailable'}), 503
 
@@ -53,7 +52,7 @@ class BillingController:
                 )
                 if doctor_response.status_code != 200:
                     return jsonify({'error': 'Doctor not found'}), 404
-            except Exception as e:
+            except requests.exceptions.RequestException as e:
                 print(f"Failed to verify doctor: {str(e)}")
                 return jsonify({'error': 'Doctor service unavailable'}), 503
 
@@ -71,7 +70,7 @@ class BillingController:
                     )
                     if consultation_fee_response.status_code == 200:
                         base_amount = consultation_fee_response.json().get('consultation_fee', base_amount)
-                except Exception as e:
+                except requests.exceptions.RequestException as e:
                     print(f"Failed to fetch consultation fee: {str(e)}")
             
             # Add additional charges if provided
@@ -103,79 +102,60 @@ class BillingController:
                 'bill': bill
             }), 201
 
-        except Exception as e:
-            return jsonify({'error': str(e)}), 500
+        # Let unexpected errors propagate to Flask's error handler
 
     def get_by_id(self, bill_id):
-        try:
-            bill = self.model.find_by_id(bill_id)
-            if not bill:
-                return jsonify({'error': 'Bill not found'}), 404
-            
-            return jsonify({'bill': bill}), 200
-
-        except Exception as e:
-            return jsonify({'error': str(e)}), 500
+        bill = self.model.find_by_id(bill_id)
+        if not bill:
+            return jsonify({'error': 'Bill not found'}), 404
+        return jsonify({'bill': bill}), 200
 
     def get_by_appointment(self, appointment_id):
-        try:
-            bill = self.model.find_by_appointment(appointment_id)
-            if not bill:
-                return jsonify({'error': 'Bill not found for this appointment'}), 404
-            
-            return jsonify({'bill': bill}), 200
-
-        except Exception as e:
-            return jsonify({'error': str(e)}), 500
+        bill = self.model.find_by_appointment(appointment_id)
+        if not bill:
+            return jsonify({'error': 'Bill not found for this appointment'}), 404
+        return jsonify({'bill': bill}), 200
 
     def get_all(self):
-        try:
-            bills = self.model.get_all()
-            return jsonify({'bills': bills, 'count': len(bills)}), 200
-
-        except Exception as e:
-            return jsonify({'error': str(e)}), 500
+        bills = self.model.get_all()
+        return jsonify({'bills': bills, 'count': len(bills)}), 200
 
     def mark_as_paid(self, bill_id, request):
+        data = request.get_json()
+
+        bill = self.model.find_by_id(bill_id)
+        if not bill:
+            return jsonify({'error': 'Bill not found'}), 404
+
+        if bill['status'] == 'paid':
+            return jsonify({'error': 'Bill already paid'}), 400
+
+        payment_method = data.get('payment_method', 'cash')
+        transaction_id = data.get('transaction_id', '')
+
+        # Notify patient about payment confirmation via REST API call
         try:
-            data = request.get_json()
-            
-            bill = self.model.find_by_id(bill_id)
-            if not bill:
-                return jsonify({'error': 'Bill not found'}), 404
+            notify_response = requests.post(
+                f"{PATIENT_SERVICE_URL}/api/patients/{bill['patient_id']}/notify",
+                json={
+                    'message': f'Payment received for bill #{bill_id}',
+                    'bill_id': bill_id,
+                    'amount': bill['total_amount']
+                },
+                timeout=5
+            )
+            print(f"Patient notified: {notify_response.status_code}")
+        except requests.exceptions.RequestException as e:
+            print(f"Failed to notify patient: {str(e)}")
 
-            if bill['status'] == 'paid':
-                return jsonify({'error': 'Bill already paid'}), 400
+        updated_bill = self.model.update(bill_id, {
+            'status': 'paid',
+            'payment_method': payment_method,
+            'transaction_id': transaction_id,
+            'paid_at': self.model.get_current_timestamp()
+        })
 
-            payment_method = data.get('payment_method', 'cash')
-            transaction_id = data.get('transaction_id', '')
-
-            # Notify patient about payment confirmation via REST API call
-            try:
-                notify_response = requests.post(
-                    f"{PATIENT_SERVICE_URL}/api/patients/{bill['patient_id']}/notify",
-                    json={
-                        'message': f'Payment received for bill #{bill_id}',
-                        'bill_id': bill_id,
-                        'amount': bill['total_amount']
-                    },
-                    timeout=5
-                )
-                print(f"Patient notified: {notify_response.status_code}")
-            except Exception as e:
-                print(f"Failed to notify patient: {str(e)}")
-
-            updated_bill = self.model.update(bill_id, {
-                'status': 'paid',
-                'payment_method': payment_method,
-                'transaction_id': transaction_id,
-                'paid_at': self.model.get_current_timestamp()
-            })
-
-            return jsonify({
-                'message': 'Bill marked as paid successfully',
-                'bill': updated_bill
-            }), 200
-
-        except Exception as e:
-            return jsonify({'error': str(e)}), 500
+        return jsonify({
+            'message': 'Bill marked as paid successfully',
+            'bill': updated_bill
+        }), 200
