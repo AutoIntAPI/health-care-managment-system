@@ -1,5 +1,6 @@
 from flask import jsonify
 import requests
+from requests.exceptions import RequestException
 import os
 from app.models.billing_model import BillingModel
 
@@ -41,7 +42,7 @@ class BillingController:
                 )
                 if patient_response.status_code != 200:
                     return jsonify({'error': 'Patient not found'}), 404
-            except Exception as e:
+            except RequestException as e:
                 print(f"Failed to verify patient: {str(e)}")
                 return jsonify({'error': 'Patient service unavailable'}), 503
 
@@ -53,7 +54,7 @@ class BillingController:
                 )
                 if doctor_response.status_code != 200:
                     return jsonify({'error': 'Doctor not found'}), 404
-            except Exception as e:
+            except RequestException as e:
                 print(f"Failed to verify doctor: {str(e)}")
                 return jsonify({'error': 'Doctor service unavailable'}), 503
 
@@ -71,7 +72,7 @@ class BillingController:
                     )
                     if consultation_fee_response.status_code == 200:
                         base_amount = consultation_fee_response.json().get('consultation_fee', base_amount)
-                except Exception as e:
+                except RequestException as e:
                     print(f"Failed to fetch consultation fee: {str(e)}")
             
             # Add additional charges if provided
@@ -162,7 +163,7 @@ class BillingController:
                     timeout=5
                 )
                 print(f"Patient notified: {notify_response.status_code}")
-            except Exception as e:
+            except RequestException as e:
                 print(f"Failed to notify patient: {str(e)}")
 
             updated_bill = self.model.update(bill_id, {
