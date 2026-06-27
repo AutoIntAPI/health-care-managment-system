@@ -7,11 +7,11 @@ controller = PatientController()
 @patient_bp.route('', methods=['POST'])
 def create_patient():
     return controller.create(request)
-
+"""
 @patient_bp.route('/<int:patient_id>', methods=['GET'])
 def get_patient(patient_id):
     return controller.get_by_id(patient_id)
-
+"""
 @patient_bp.route('', methods=['GET'])
 def get_all_patients():
     return controller.get_all()
