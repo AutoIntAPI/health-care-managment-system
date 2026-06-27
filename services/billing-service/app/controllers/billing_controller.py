@@ -141,19 +141,12 @@ class BillingController:
             transaction_id = data.get('transaction_id', '')
 
             # Notify patient about payment confirmation via REST API call
-            try:
-                notify_response = requests.post(
-                    f"{PATIENT_SERVICE_URL}/api/patients/{bill['patient_id']}/notify",
-                    json={
-                        'message': f'Payment received for bill #{bill_id}',
-                        'bill_id': bill_id,
-                        'amount': bill['total_amount']
-                    },
-                    timeout=5
-                )
-                print(f"Patient notified: {notify_response.status_code}")
-            except Exception as e:
-                print(f"Failed to notify patient: {str(e)}")
+            # Patient notification endpoint was removed from patient-service
+            # Notification logic must be handled by other means
+            print(
+                f"Payment received for bill #{bill_id} for patient {bill['patient_id']}. "
+                "Notification should be handled separately."
+            )
 
             updated_bill = self.model.update(bill_id, {
                 'status': 'paid',

@@ -226,19 +226,11 @@ class AppointmentController {
 				return res.status(404).json({ error: "Appointment not found" });
 			}
 
-			// Notify patient about cancellation via REST API call (if notification endpoint exists)
-			try {
-				await axios.post(
-					`${PATIENT_SERVICE_URL}/api/patients/${appointment.patient_id}/notify`,
-					{
-						message: "Your appointment has been cancelled",
-						appointment_id: id,
-					},
-				);
-			} catch (error) {
-				console.error("Failed to notify patient:", error.message);
-			}
-
+            // Patient notification endpoint was removed from patient-service
+            // Notification logic must be handled by other means
+            console.log(
+              `Appointment ${id} cancelled for patient ${appointment.patient_id}. Notification should be handled separately.`,
+            );
 			// Update billing status to cancelled via REST API call
 			if (appointment.billing_id) {
 				try {
