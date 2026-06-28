@@ -24,10 +24,10 @@ controller = PatientController()
 # # def delete_patient(patient_id):
 # #     return controller.delete(patient_id)
 
-# # @patient_bp.route('/<int:patient_id>/notify', methods=['POST'])
-# # def notify_patient(patient_id):
-# #     """Endpoint to notify patient (used by other services)"""
-# #     data = request.get_json()
-# #     message = data.get('message', 'No message')
-# #     print(f"Notification sent to patient {patient_id}: {message}")
-# #     return jsonify({'message': 'Notification sent successfully'}), 200
+@patient_bp.route('/<int:patient_id>/deliver', methods=['POST'])
+def notify_patient(patient_id):
+    """Endpoint to notify patient (used by other services)"""
+    data = request.get_json()
+    message = data.get('message', 'No message')
+    print(f"Notification sent to patient {patient_id}: {message}")
+    return jsonify({'message': 'Notification sent successfully'}), 200
