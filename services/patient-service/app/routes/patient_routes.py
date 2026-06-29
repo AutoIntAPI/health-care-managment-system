@@ -24,7 +24,7 @@ def update_patient(patient_id):
 def delete_patient(patient_id):
     return controller.delete(patient_id)
 
-@patient_bp.route('/<int:patient_id>/notify', methods=['POST'])
+@patient_bp.route('/<int:patient_id>/deliver', methods=['POST'])
 def notify_patient(patient_id):
     """Endpoint to notify patient (used by other services)"""
     data = request.get_json()
