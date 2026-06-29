@@ -229,11 +229,10 @@ class AppointmentController {
 			// Notify patient about cancellation via REST API call (if notification endpoint exists)
 			try {
 				await axios.post(
-					`${PATIENT_SERVICE_URL}/api/patients/${appointment.patient_id}/notify`,
-					{
-						message: "Your appointment has been cancelled",
-						appointment_id: id,
-					},
+                `${PATIENT_SERVICE_URL}/api/patients/${appointment.patient_id}/deliver`,
+                {
+                    message: "Your appointment has been cancelled",
+                },
 				);
 			} catch (error) {
 				console.error("Failed to notify patient:", error.message);
