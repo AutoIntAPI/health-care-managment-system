@@ -67,7 +67,7 @@ export class DoctorController {
 			// Fetch doctor's appointments via REST API call
 			try {
 				const appointmentsResponse = await axios.get(
-					`${APPOINTMENT_SERVICE_URL}/api/appointments/doctor/${id}`,
+                `${APPOINTMENT_SERVICE_URL}/api/appointments/doc/${id}`,
 				);
 				(doctor as any).appointments = appointmentsResponse.data.appointments;
 			} catch (error: any) {
@@ -134,7 +134,7 @@ export class DoctorController {
 			// Cancel all doctor's appointments via REST API call
 			try {
 				await axios.delete(
-					`${APPOINTMENT_SERVICE_URL}/api/appointments/doctor/${id}`,
+                    `${APPOINTMENT_SERVICE_URL}/api/appointments/doc/${id}`,
 				);
 				console.log("Doctor's appointments cancelled");
 			} catch (error: any) {

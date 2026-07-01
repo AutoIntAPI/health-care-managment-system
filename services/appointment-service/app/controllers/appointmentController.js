@@ -106,7 +106,7 @@ class AppointmentController {
 			// Enrich appointment with patient details via REST API call
 			try {
 				const patientResponse = await axios.get(
-					`${PATIENT_SERVICE_URL}/api/patients/${appointment.patient_id}`,
+                `${PATIENT_SERVICE_URL}/patients/${appointment.patient_id}`,
 				);
 				appointment.patient_details = patientResponse.data.patient;
 			} catch (error) {
@@ -116,7 +116,7 @@ class AppointmentController {
 			// Enrich appointment with doctor details via REST API call
 			try {
 				const doctorResponse = await axios.get(
-					`${DOCTOR_SERVICE_URL}/api/doctors/${appointment.doctor_id}`,
+                `${DOCTOR_SERVICE_URL}/doctors/${appointment.doctor_id}`,
 				);
 				appointment.doctor_details = doctorResponse.data.doctor;
 			} catch (error) {
@@ -169,7 +169,7 @@ class AppointmentController {
 			) {
 				try {
 					const patientResponse = await axios.get(
-						`${PATIENT_SERVICE_URL}/api/patients/${data.patient_id}`,
+                            `${PATIENT_SERVICE_URL}/patients/${data.patient_id}`,
 					);
 					if (!patientResponse.data.patient) {
 						return res.status(404).json({ error: "New patient not found" });
@@ -188,14 +188,14 @@ class AppointmentController {
 			if (data.doctor_id) {
 				try {
 					const doctorResponse = await axios.get(
-						`${DOCTOR_SERVICE_URL}/api/doctors/${data.doctor_id}`,
+                            `${DOCTOR_SERVICE_URL}/doctors/${data.doctor_id}`,
 					);
 					if (!doctorResponse.data.doctor) {
 						return res.status(404).json({ error: "Doctor not found" });
 					}
 					// Check doctor availability via REST API call
 					const availabilityResponse = await axios.get(
-						`${DOCTOR_SERVICE_URL}/api/doctors/${data.doctor_id}/availability`,
+                        `${DOCTOR_SERVICE_URL}/doctors/${data.doctor_id}/aval`,
 					);
 					data.doctor_availability = availabilityResponse.data.availability;
 				} catch (error) {
