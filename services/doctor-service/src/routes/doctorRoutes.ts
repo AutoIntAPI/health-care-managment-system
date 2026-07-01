@@ -9,7 +9,7 @@ router.get("/:id", controller.getById.bind(controller));
 router.get("/", controller.getAll.bind(controller));
 router.put("/:id", controller.update.bind(controller));
 router.delete("/:id", controller.delete.bind(controller));
-router.get("/:id/availability", controller.getAvailability.bind(controller));
-router.post("/:id/availability", controller.setAvailability.bind(controller));
+router.get("/:id/aval", controller.getAvailability.bind(controller));
+router.post("/:id/aval", controller.setAvailability.bind(controller));
 
 export default router;

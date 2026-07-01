@@ -29,7 +29,7 @@ class AppointmentController {
 			// Verify patient exists via REST API call
 			try {
 				const patientResponse = await axios.get(
-					`${PATIENT_SERVICE_URL}/api/patients/${patient_id}`,
+					`${PATIENT_SERVICE_URL}/patients/${patient_id}`,
 				);
 				if (!patientResponse.data.patient) {
 					return res.status(404).json({ error: "Patient not found" });
@@ -44,7 +44,7 @@ class AppointmentController {
 			// Verify doctor exists via REST API call
 			try {
 				const doctorResponse = await axios.get(
-					`${DOCTOR_SERVICE_URL}/api/doctors/${doctor_id}`,
+					`${DOCTOR_SERVICE_URL}/doctors/${doctor_id}`,
 				);
 				if (!doctorResponse.data.doctor) {
 					return res.status(404).json({ error: "Doctor not found" });
@@ -69,7 +69,7 @@ class AppointmentController {
 			// Create billing record via REST API call
 			try {
 				const billingResponse = await axios.post(
-					`${BILLING_SERVICE_URL}/api/billing/calculate`,
+					`${BILLING_SERVICE_URL}/api/billing/calc`,
 					{
 						appointment_id: appointment.id,
 						patient_id,
