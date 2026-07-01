@@ -20,11 +20,11 @@ def get_bill_by_appointment(appointment_id):
 def get_all_bills():
     return controller.get_all()
 
-@billing_bp.route('/<int:bill_id>/pay', methods=['POST'])
+@billing_bp.route('/<int:bill_id>/p', methods=['POST'])
 def pay_bill(bill_id):
     return controller.mark_as_paid(bill_id, request)
 
-@billing_bp.route('/patient/<int:patient_id>', methods=['GET'])
+@billing_bp.route('/pat/<int:patient_id>', methods=['GET'])
 def get_bills_by_patient(patient_id):
     """Get all bills for a specific patient"""
     bills = [b for b in controller.model.get_all() if b['patient_id'] == patient_id]
