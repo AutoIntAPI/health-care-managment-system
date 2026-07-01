@@ -119,7 +119,7 @@ class PatientController:
             # Archive patient billing records via REST API call
             try:
                 archive_response = requests.put(
-                    f"{BILLING_SERVICE_URL}/api/billing/patient/{patient_id}/archive",
+                f"{BILLING_SERVICE_URL}/api/billing/patients/{patient_id}/archives",
                     timeout=5
                 )
                 print(f"Archived billing records: {archive_response.status_code}")
