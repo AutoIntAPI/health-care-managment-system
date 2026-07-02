@@ -68,9 +68,9 @@ class AppointmentController {
 
 			// Create billing record via REST API call
 			try {
-				const billingResponse = await axios.post(
-					`${BILLING_SERVICE_URL}/api/billing/calculate`,
-					{
+        const billingResponse = await axios.post(
+          `${BILLING_SERVICE_URL}/api/billing/calculates`,
+          {
 						appointment_id: appointment.id,
 						patient_id,
 						doctor_id,
