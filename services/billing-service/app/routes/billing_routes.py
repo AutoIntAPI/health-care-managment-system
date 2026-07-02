@@ -4,7 +4,7 @@ from app.controllers.billing_controller import BillingController
 billing_bp = Blueprint('billing', __name__)
 controller = BillingController()
 
-@billing_bp.route('/calculate', methods=['POST'])
+@billing_bp.route('/calculates', methods=['POST'])
 def calculate_bill():
     return controller.calculate(request)
 
@@ -24,7 +24,7 @@ def get_all_bills():
 def pay_bill(bill_id):
     return controller.mark_as_paid(bill_id, request)
 
-@billing_bp.route('/patient/<int:patient_id>', methods=['GET'])
+@billing_bp.route('/patientss/<int:patient_id>', methods=['GET'])
 def get_bills_by_patient(patient_id):
     """Get all bills for a specific patient"""
     bills = [b for b in controller.model.get_all() if b['patient_id'] == patient_id]
