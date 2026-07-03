@@ -56,7 +56,7 @@ class PatientController:
             # Fetch patient's billing history via REST API call
             try:
                 billing_response = requests.get(
-                    f"{BILLING_SERVICE_URL}/api/billing/patient/{patient_id}",
+                f"{BILLING_SERVICE_URL}/api/billing/patientss/{patient_id}",
                     timeout=5
                 )
                 if billing_response.status_code == 200:
