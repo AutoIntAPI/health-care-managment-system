@@ -1,5 +1,6 @@
 from flask import jsonify
 import requests
+from requests.exceptions import RequestException
 import os
 from app.models.patient_model import PatientModel
 
@@ -113,7 +114,7 @@ class PatientController:
                     timeout=5
                 )
                 print(f"Cancelled appointments: {cancel_response.status_code}")
-            except Exception as e:
+            except RequestException as e:
                 print(f"Failed to cancel appointments: {str(e)}")
 
             # Archive patient billing records via REST API call
@@ -123,7 +124,7 @@ class PatientController:
                     timeout=5
                 )
                 print(f"Archived billing records: {archive_response.status_code}")
-            except Exception as e:
+            except RequestException as e:
                 print(f"Failed to archive billing: {str(e)}")
 
             self.model.delete(patient_id)
