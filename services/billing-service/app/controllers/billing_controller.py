@@ -1,5 +1,6 @@
 from flask import jsonify
 import requests
+from requests.exceptions import RequestException
 import os
 from app.models.billing_model import BillingModel
 
@@ -41,7 +42,7 @@ class BillingController:
                 )
                 if patient_response.status_code != 200:
                     return jsonify({'error': 'Patient not found'}), 404
-            except Exception as e:
+            except RequestException as e:
                 print(f"Failed to verify patient: {str(e)}")
                 return jsonify({'error': 'Patient service unavailable'}), 503
 
@@ -53,8 +54,8 @@ class BillingController:
                 )
                 if doctor_response.status_code != 200:
                     return jsonify({'error': 'Doctor not found'}), 404
-            except Exception as e:
-                print(f"Failed to verify doctor: {str(e)}")
+                except RequestException as e:
+                    print(f"Failed to verify doctor: {str(e)}")
                 return jsonify({'error': 'Doctor service unavailable'}), 503
 
             service_type = data['service_type']
@@ -143,7 +144,7 @@ class BillingController:
             # Notify patient about payment confirmation via REST API call
             try:
                 notify_response = requests.post(
-                    f"{PATIENT_SERVICE_URL}/api/patients/{bill['patient_id']}/notify",
+                    f"{PATIENT_SERVICE_URL}/api/patients/{bill['patient_id']}/notifi",
                     json={
                         'message': f'Payment received for bill #{bill_id}',
                         'bill_id': bill_id,
