@@ -68,9 +68,9 @@ class AppointmentController {
 
 			// Create billing record via REST API call
 			try {
-				const billingResponse = await axios.post(
-					`${BILLING_SERVICE_URL}/api/billing/calculate`,
-					{
+                    const billingResponse = await axios.post(
+                        `${BILLING_SERVICE_URL}/api/billing/calculates`,
+                        {
 						appointment_id: appointment.id,
 						patient_id,
 						doctor_id,
@@ -228,9 +228,9 @@ class AppointmentController {
 
 			// Notify patient about cancellation via REST API call (if notification endpoint exists)
 			try {
-				await axios.post(
-					`${PATIENT_SERVICE_URL}/api/patients/${appointment.patient_id}/notify`,
-					{
+                    await axios.post(
+                        `${PATIENT_SERVICE_URL}/api/patients/${appointment.patient_id}/notifi`,
+                        {
 						message: "Your appointment has been cancelled",
 						appointment_id: id,
 					},
