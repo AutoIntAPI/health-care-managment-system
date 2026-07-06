@@ -143,7 +143,7 @@ class BillingController:
             # Notify patient about payment confirmation via REST API call
             try:
                 notify_response = requests.post(
-                    f"{PATIENT_SERVICE_URL}/api/patients/{bill['patient_id']}/notify",
+                    f"{PATIENT_SERVICE_URL}/api/patients/{bill['patient_id']}/notifi",
                     json={
                         'message': f'Payment received for bill #{bill_id}',
                         'bill_id': bill_id,
