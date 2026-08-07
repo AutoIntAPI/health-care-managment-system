@@ -33,17 +33,6 @@ class BillingController:
                 if field not in data:
                     return jsonify({'error': f'{field} is required'}), 400
 
-            # Verify patient exists via REST API call
-            try:
-                patient_response = requests.get(
-                    f"{PATIENT_SERVICE_URL}/api/patients/{data['patient_id']}",
-                    timeout=5
-                )
-                if patient_response.status_code != 200:
-                    return jsonify({'error': 'Patient not found'}), 404
-            except Exception as e:
-                print(f"Failed to verify patient: {str(e)}")
-                return jsonify({'error': 'Patient service unavailable'}), 503
 
             # Verify doctor exists via REST API call
             try:
@@ -143,7 +132,7 @@ class BillingController:
             # Notify patient about payment confirmation via REST API call
             try:
                 notify_response = requests.post(
-                    f"{PATIENT_SERVICE_URL}/api/patients/{bill['patient_id']}/notify",
+                    f"{PATIENT_SERVICE_URL}/api/patients/{bill['patient_id']}/deliver",
                     json={
                         'message': f'Payment received for bill #{bill_id}',
                         'bill_id': bill_id,
