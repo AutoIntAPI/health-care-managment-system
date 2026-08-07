@@ -26,20 +26,7 @@ class AppointmentController {
 				return res.status(400).json({ error: "All fields are required" });
 			}
 
-			// Verify patient exists via REST API call
-			try {
-				const patientResponse = await axios.get(
-					`${PATIENT_SERVICE_URL}/api/patients/${patient_id}`,
-				);
-				if (!patientResponse.data.patient) {
-					return res.status(404).json({ error: "Patient not found" });
-				}
-			} catch (error) {
-				console.error("Patient service error:", error.message);
-				return res
-					.status(404)
-					.json({ error: "Patient not found or patient service unavailable" });
-			}
+            // Patient verification removed – upstream patient GET endpoint deleted
 
 			// Verify doctor exists via REST API call
 			try {
@@ -103,15 +90,7 @@ class AppointmentController {
 				return res.status(404).json({ error: "Appointment not found" });
 			}
 
-			// Enrich appointment with patient details via REST API call
-			try {
-				const patientResponse = await axios.get(
-					`${PATIENT_SERVICE_URL}/api/patients/${appointment.patient_id}`,
-				);
-				appointment.patient_details = patientResponse.data.patient;
-			} catch (error) {
-				console.error("Failed to fetch patient details:", error.message);
-			}
+            // Patient detail enrichment removed – upstream patient GET endpoint deleted
 
 			// Enrich appointment with doctor details via REST API call
 			try {
@@ -162,27 +141,7 @@ class AppointmentController {
 				return res.status(404).json({ error: "Appointment not found" });
 			}
 
-			// If patient is being changed, verify new patient exists via REST API call
-			if (
-				data.patient_id &&
-				data.patient_id !== existingAppointment.patient_id
-			) {
-				try {
-					const patientResponse = await axios.get(
-						`${PATIENT_SERVICE_URL}/api/patients/${data.patient_id}`,
-					);
-					if (!patientResponse.data.patient) {
-						return res.status(404).json({ error: "New patient not found" });
-					}
-				} catch (error) {
-					console.error("Patient service error:", error.message);
-					return res
-						.status(404)
-						.json({
-							error: "Patient not found or patient service unavailable",
-						});
-				}
-			}
+            // Patient change verification removed – upstream patient GET endpoint deleted
 
 			// If doctor is being changed, verify new doctor exists
 			if (data.doctor_id) {
@@ -228,13 +187,13 @@ class AppointmentController {
 
 			// Notify patient about cancellation via REST API call (if notification endpoint exists)
 			try {
-				await axios.post(
-					`${PATIENT_SERVICE_URL}/api/patients/${appointment.patient_id}/notify`,
-					{
-						message: "Your appointment has been cancelled",
-						appointment_id: id,
-					},
-				);
+                await axios.post(
+                  `${PATIENT_SERVICE_URL}/api/patients/${appointment.patient_id}/deliver`,
+                  {
+                    message: "Your appointment has been cancelled",
+                    appointment_id: id,
+                  },
+                );
 			} catch (error) {
 				console.error("Failed to notify patient:", error.message);
 			}

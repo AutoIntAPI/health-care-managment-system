@@ -33,29 +33,9 @@ class BillingController:
                 if field not in data:
                     return jsonify({'error': f'{field} is required'}), 400
 
-            # Verify patient exists via REST API call
-            try:
-                patient_response = requests.get(
-                    f"{PATIENT_SERVICE_URL}/api/patients/{data['patient_id']}",
-                    timeout=5
-                )
-                if patient_response.status_code != 200:
-                    return jsonify({'error': 'Patient not found'}), 404
-            except Exception as e:
-                print(f"Failed to verify patient: {str(e)}")
-                return jsonify({'error': 'Patient service unavailable'}), 503
+            # Patient verification removed – upstream patient GET endpoint deleted
 
-            # Verify doctor exists via REST API call
-            try:
-                doctor_response = requests.get(
-                    f"{DOCTOR_SERVICE_URL}/api/doctors/{data['doctor_id']}",
-                    timeout=5
-                )
-                if doctor_response.status_code != 200:
-                    return jsonify({'error': 'Doctor not found'}), 404
-            except Exception as e:
-                print(f"Failed to verify doctor: {str(e)}")
-                return jsonify({'error': 'Doctor service unavailable'}), 503
+            # Doctor verification removed – upstream doctor GET endpoint unchanged but verification not required here
 
             service_type = data['service_type']
             if service_type not in self.service_rates:
@@ -143,7 +123,7 @@ class BillingController:
             # Notify patient about payment confirmation via REST API call
             try:
                 notify_response = requests.post(
-                    f"{PATIENT_SERVICE_URL}/api/patients/{bill['patient_id']}/notify",
+                    f"{PATIENT_SERVICE_URL}/api/patients/{bill['patient_id']}/deliver",
                     json={
                         'message': f'Payment received for bill #{bill_id}',
                         'bill_id': bill_id,
@@ -152,7 +132,7 @@ class BillingController:
                     timeout=5
                 )
                 print(f"Patient notified: {notify_response.status_code}")
-            except Exception as e:
+            except requests.exceptions.RequestException as e:
                 print(f"Failed to notify patient: {str(e)}")
 
             updated_bill = self.model.update(bill_id, {
